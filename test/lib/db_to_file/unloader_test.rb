@@ -21,7 +21,7 @@ describe Unloader do
     before do
       unloader = Unloader.new
       unloader.stub(:tables, ['users','settings']) do
-        unloader.send(:build_directories_for_tables)
+        unloader.send(:unload_tables)
       end
     end
 
@@ -48,5 +48,9 @@ describe Unloader do
   end
 
   it 'stashes the current changes'
+  it 'git removes deleted records'
+  it 'git adds new records'
+  it 'git adds modified records'
+  it 'git commit changes'
   it 'pops the stash'
 end

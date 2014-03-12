@@ -1,17 +1,43 @@
 class Unloader
   def unload
-    build_directories_for_tables
+    unload_tables
   end
 
   private
-    def build_directories_for_tables
+    def tables
+      config['tables']
+    end
+
+    def unload_tables
       tables.each do |table|
-        FileUtils.mkdir_p("db/db_to_unload/#{table}")
+        unload_table(table)
       end
     end
 
-    def tables
-      config['tables']
+    def unload_table(table)
+      table.singularize.capitalize.constantize.all.each do |record|
+        build_directory_for_record(record)
+        build_files_for_record_fields(record)
+      end
+    end
+
+    def build_directory_for_record(record)
+      FileUtils.mkdir_p(directory_for_record(record))
+    end
+
+    def build_files_for_record_fields(record)
+      base_dir = directory_for_record(record)
+      record.attributes.each do |field, value|
+        file = File.join(base_dir, field)
+        handle = File.open(file, 'w')
+        handle.write(value)
+        handle.close
+      end
+    end
+
+    def directory_for_record(record)
+      table = record.class.table_name
+      "db/db_to_unload/#{table}/#{record.id}"
     end
 
     def config

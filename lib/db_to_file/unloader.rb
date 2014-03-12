@@ -1,10 +1,23 @@
 class Unloader
-  attr_reader :config
-  def config
-    @config ||= load_config
+  def unload
+    build_directories_for_tables
   end
 
   private
+    def build_directories_for_tables
+      tables.each do |table|
+        FileUtils.mkdir_p("db/db_to_unload/#{table}")
+      end
+    end
+
+    def tables
+      config['tables']
+    end
+
+    def config
+      @config ||= load_config
+    end
+
     def load_config
       YAML::load(File.read(config_file))
     end

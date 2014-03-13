@@ -4,9 +4,15 @@ require 'minitest/unit'
 require 'minitest/autorun'
 require "mocha/setup"
 require 'active_record'
+require 'turn'
 require_relative 'lib/user'
 require_relative 'lib/setting'
 require File.expand_path('../../lib/db_to_file.rb', __FILE__)
+
+Turn.config do |c|
+  c.format  = :outline
+  c.natural = true
+end
 
 dbconfig = YAML::load(File.open('db/database.yml'))
 ActiveRecord::Base.establish_connection(dbconfig)

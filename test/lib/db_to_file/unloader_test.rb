@@ -44,7 +44,15 @@ describe Unloader do
       File.directory?('db/db_to_unload/settings/2').must_equal true
     end
 
-    it 'builds the files for the record-files'
+    it 'builds the files for the record-files' do
+      File.file?('db/db_to_unload/users/1/id').must_equal true
+      File.file?('db/db_to_unload/users/1/name').must_equal true
+      File.file?('db/db_to_unload/settings/2/key').must_equal true
+      File.file?('db/db_to_unload/settings/2/value').must_equal true
+
+      File.read('db/db_to_unload/users/1/name').must_equal 'Ewout Quax'
+      File.read('db/db_to_unload/settings/2/value').must_equal 'Value_2'
+    end
   end
 
   it 'stashes the current changes'

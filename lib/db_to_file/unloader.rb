@@ -8,16 +8,45 @@ class Unloader
     def prepare_code_version
       SystemExecuter.new('git stash save').execute
       SystemExecuter.new('git pull').execute
-    end
-
-    def tables
-      config['tables']
+      FileUtils.rm_rf('db/db_to_unload')
     end
 
     def unload_tables
       tables.each do |table|
         unload_table(table)
       end
+    end
+
+    def update_code_version
+      new_files.each do |file|
+        SystemExecuter.new("git add #{file}").execute
+      end
+      modified_files.each do |file|
+        SystemExecuter.new("git add #{file}").execute
+      end
+      deleted_files.each do |file|
+        SystemExecuter.new("git rm #{file}").execute
+      end
+    end
+
+    def new_files
+      git.status.untracked.map{|file, git_object| file}
+    end
+
+    def modified_files
+      git.status.untracked.map{|file, git_object| file}
+    end
+
+    def deleted_files
+      git.status.deleted.map{|file, git_object| file}
+    end
+
+    def git
+      @git ||= Git.open(Dir.pwd)
+    end
+
+    def tables
+      config['tables']
     end
 
     def unload_table(table)

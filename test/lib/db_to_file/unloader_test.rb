@@ -14,7 +14,13 @@ describe Unloader do
   end
 
   describe 'unloading' do
-    it 'calls the functions'
+    it 'calls the functions' do
+      unloader = Unloader.new
+      unloader.expects(:prepare_code_version)
+      unloader.expects(:unload_tables)
+
+      unloader.unload
+    end
   end
 
   describe 'build directory' do
@@ -55,7 +61,17 @@ describe Unloader do
     end
   end
 
-  it 'stashes the current changes'
+  describe 'prepare code-versioning' do
+    it 'invokes the system-commander' do
+      executer = SystemExecuter.new('ls')
+      executer.expects(:execute).times(2)
+      SystemExecuter.expects(:new).with('git stash save').returns(executer)
+      SystemExecuter.expects(:new).with('git pull').returns(executer)
+
+      Unloader.new.send(:prepare_code_version)
+    end
+  end
+
   it 'git removes deleted records'
   it 'git adds new records'
   it 'git adds modified records'

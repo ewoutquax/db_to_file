@@ -1,9 +1,15 @@
 class Unloader
   def unload
+    prepare_code_version
     unload_tables
   end
 
   private
+    def prepare_code_version
+      SystemExecuter.new('git stash save').execute
+      SystemExecuter.new('git pull').execute
+    end
+
     def tables
       config['tables']
     end

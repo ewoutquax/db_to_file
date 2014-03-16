@@ -1,3 +1,8 @@
+require 'simplecov'
+SimpleCov.start 'rails' do
+  add_filter "/uploaders/"
+end
+
 require 'db_to_file'
 require 'pry'
 require 'minitest/unit'

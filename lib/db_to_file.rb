@@ -4,5 +4,5 @@ require 'db_to_file/unloader'
 require 'db_to_file/system_executer'
 
 module DbToFile
-  # Your code goes here...
+  require 'db_to_file/railtie' if defined?(Rails)
 end

@@ -3,6 +3,7 @@ module DbToFile
     def unload
       prepare_code_version
       unload_tables
+      update_code_version
     end
 
     private
@@ -19,6 +20,12 @@ module DbToFile
       end
 
       def update_code_version
+        update_commit_stash
+        commit_changes if commitable_files_present?
+        restore_stash
+      end
+
+      def update_commit_stash
         new_files.each do |file|
           SystemExecuter.new("git add #{file}").execute if table_file?(file)
         end
@@ -28,6 +35,19 @@ module DbToFile
         deleted_files.each do |file|
           SystemExecuter.new("git rm #{file}").execute if table_file?(file)
         end
+      end
+
+      def commitable_files_present?
+        out = SystemExecuter.new('git status --porcelain')
+        out.split("\n").reject{|line| [' ', '?'].include?(line[0])}.any?
+      end
+
+      def commit_changes
+        git.commit('Customer changes')
+      end
+
+      def restore_stash
+        SystemExecuter.new('git stash pop').execute
       end
 
       def new_files

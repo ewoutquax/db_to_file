@@ -5,11 +5,16 @@ describe DbToFile::Unloader do
   describe 'configuration-file' do
     before do
       @unloader = DbToFile::Unloader.new
-      @unloader.stubs(:config_file).returns('test/fixtures/config.yml')
+    end
+
+    it 'can be found' do
+      @unloader.send(:config_file).must_equal('config/db_to_file.yml')
     end
 
     it 'can be parsed' do
-      @unloader.send(:tables).must_equal(['users', 'settings'])
+      @unloader.stub(:config_file, 'test/fixtures/config.yml') do
+        @unloader.send(:tables).must_equal(['users', 'settings'])
+      end
     end
   end
 
@@ -18,6 +23,7 @@ describe DbToFile::Unloader do
       unloader = DbToFile::Unloader.new
       unloader.expects(:prepare_code_version)
       unloader.expects(:unload_tables)
+      unloader.expects(:update_code_version)
 
       unloader.unload
     end
@@ -73,31 +79,62 @@ describe DbToFile::Unloader do
     end
   end
 
-  describe 'update code-versioning' do
-    before do
-      DbToFile::Unloader.new.send(:unload_table, 'users')
-    end
-
-    after do
-      FileUtils.rm_rf('db/db_to_file')
-    end
-
-    it 'git adds new records' do
+  describe 'update_code_version' do
+    it 'invokes all the functions' do
       executer = DbToFile::SystemExecuter.new('')
-      executer.expects(:execute).times(4)
+      executer.expects(:execute).times(1)
+      DbToFile::SystemExecuter.expects(:new).with('git stash pop').returns(executer)
 
-      DbToFile::SystemExecuter.expects(:new).with('git add db/db_to_file/users/1/id').returns(executer)
-      DbToFile::SystemExecuter.expects(:new).with('git add db/db_to_file/users/1/name').returns(executer)
-      DbToFile::SystemExecuter.expects(:new).with('git add db/db_to_file/users/2/id').returns(executer)
-      DbToFile::SystemExecuter.expects(:new).with('git add db/db_to_file/users/2/name').returns(executer)
+      unloader = DbToFile::Unloader.new
+      unloader.expects(:update_commit_stash)
+      unloader.expects(:commitable_files_present?).returns(true)
+      unloader.expects(:commit_changes)
 
-      DbToFile::Unloader.new.send(:update_code_version)
+      unloader.send(:update_code_version)
     end
 
-    it 'git removes deleted records'
-    it 'git adds modified records'
-  end
+    describe 'update commit_stash' do
+      before do
+        DbToFile::Unloader.new.send(:unload_table, 'users')
+      end
 
-  it 'git commit changes'
-  it 'pops the stash'
+      after do
+        FileUtils.rm_rf('db/db_to_file')
+      end
+
+      it 'git adds new records' do
+        executer = DbToFile::SystemExecuter.new('')
+        executer.expects(:execute).times(4)
+
+        DbToFile::SystemExecuter.expects(:new).with('git add db/db_to_file/users/1/id').returns(executer)
+        DbToFile::SystemExecuter.expects(:new).with('git add db/db_to_file/users/1/name').returns(executer)
+        DbToFile::SystemExecuter.expects(:new).with('git add db/db_to_file/users/2/id').returns(executer)
+        DbToFile::SystemExecuter.expects(:new).with('git add db/db_to_file/users/2/name').returns(executer)
+
+        DbToFile::Unloader.new.send(:update_commit_stash)
+      end
+
+      it 'git removes deleted records'
+      it 'git adds modified records'
+    end
+
+    it 'git commit changes' do
+      git = Minitest::Mock.new
+
+      unloader = DbToFile::Unloader.new
+      unloader.expects(:git).returns(git)
+
+      git.expect(:commit, nil, ['Customer changes'])
+      unloader.send(:commit_changes)
+      git.verify
+    end
+
+    it 'restores the stash' do
+      executer = DbToFile::SystemExecuter.new('')
+      executer.expects(:execute).times(1)
+      DbToFile::SystemExecuter.expects(:new).with('git stash pop').returns(executer)
+
+      DbToFile::Unloader.new.send(:restore_stash)
+    end
+  end
 end

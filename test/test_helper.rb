@@ -1,7 +1,5 @@
 require 'simplecov'
-SimpleCov.start 'rails' do
-  add_filter "/uploaders/"
-end
+SimpleCov.start
 
 require 'db_to_file'
 require 'pry'

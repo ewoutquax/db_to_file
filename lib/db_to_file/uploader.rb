@@ -1,10 +1,18 @@
 module DbToFile
   class Uploader
     def upload
-      build_objects
+      write_objects_to_db
     end
 
     private
+      def write_objects_to_db
+        objects.each(&:save!)
+      end
+
+      def objects
+        @objects ||= build_objects
+      end
+
       def build_objects
         objects = []
         read_files.each do |model_field_file|

@@ -4,9 +4,21 @@ require 'fileutils'
 describe DbToFile::Uploader do
   it 'invokes all the functions' do
     uploader = DbToFile::Uploader.new
-    uploader.expects(:build_objects)
+    uploader.expects(:write_objects_to_db)
 
     uploader.upload
+  end
+
+  describe 'objects' do
+    it 'are saved to the db' do
+      user_1 = User.new(name: 'Test UserName')
+      uploader = DbToFile::Uploader.new
+      uploader.expects(:objects).returns([user_1])
+
+      uploader.send(:write_objects_to_db)
+
+      User.last.must_equal(user_1)
+    end
   end
 
   describe 'unloaded files' do

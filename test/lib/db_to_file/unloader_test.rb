@@ -68,73 +68,26 @@ describe DbToFile::Unloader do
   end
 
   describe 'prepare code-versioning' do
-    it 'invokes the system-commander' do
-      executer = DbToFile::SystemExecuter.new('ls')
-      executer.expects(:execute).times(2)
-      DbToFile::SystemExecuter.expects(:new).with('git stash save').returns(executer)
-      DbToFile::SystemExecuter.expects(:new).with('git pull').returns(executer)
-      File::FileUtils.expects(:rm_rf)
+    it 'invokes the version-controller' do
+      controller = Minitest::Mock.new
+      DbToFile::VersionController.expects(:new).returns(controller)
 
+      controller.expect(:prepare_code_version, nil)
       DbToFile::Unloader.new.send(:prepare_code_version)
+      controller.verify
     end
   end
 
   describe 'update_code_version' do
     it 'invokes all the functions' do
-      executer = DbToFile::SystemExecuter.new('')
-      executer.expects(:execute).times(1)
-      DbToFile::SystemExecuter.expects(:new).with('git stash pop').returns(executer)
+      controller = Minitest::Mock.new
 
       unloader = DbToFile::Unloader.new
-      unloader.expects(:update_commit_stash)
-      unloader.expects(:commitable_files_present?).returns(true)
-      unloader.expects(:commit_changes)
+      unloader.expects(:version_controller).returns(controller)
 
+      controller.expect(:update_code_version, nil)
       unloader.send(:update_code_version)
-    end
-
-    describe 'update commit_stash' do
-      before do
-        DbToFile::Unloader.new.send(:unload_table, 'users')
-      end
-
-      after do
-        FileUtils.rm_rf('db/db_to_file')
-      end
-
-      it 'git adds new records' do
-        executer = DbToFile::SystemExecuter.new('')
-        executer.expects(:execute).times(4)
-
-        DbToFile::SystemExecuter.expects(:new).with('git add db/db_to_file/users/1/id').returns(executer)
-        DbToFile::SystemExecuter.expects(:new).with('git add db/db_to_file/users/1/name').returns(executer)
-        DbToFile::SystemExecuter.expects(:new).with('git add db/db_to_file/users/2/id').returns(executer)
-        DbToFile::SystemExecuter.expects(:new).with('git add db/db_to_file/users/2/name').returns(executer)
-
-        DbToFile::Unloader.new.send(:update_commit_stash)
-      end
-
-      it 'git removes deleted records'
-      it 'git adds modified records'
-    end
-
-    it 'git commit changes' do
-      git = Minitest::Mock.new
-
-      unloader = DbToFile::Unloader.new
-      unloader.expects(:git).returns(git)
-
-      git.expect(:commit, nil, ['Customer changes'])
-      unloader.send(:commit_changes)
-      git.verify
-    end
-
-    it 'restores the stash' do
-      executer = DbToFile::SystemExecuter.new('')
-      executer.expects(:execute).times(1)
-      DbToFile::SystemExecuter.expects(:new).with('git stash pop').returns(executer)
-
-      DbToFile::Unloader.new.send(:restore_stash)
+      controller.verify
     end
   end
 end

@@ -10,10 +10,14 @@ describe DbToFile::Uploader do
   end
 
   describe 'objects' do
+    after do
+      User.last.delete
+    end
+
     it 'are saved to the db' do
       user_1 = User.new(name: 'Test UserName')
       uploader = DbToFile::Uploader.new
-      uploader.expects(:objects).returns([user_1])
+      uploader.expects(:build_objects).returns([user_1])
 
       uploader.send(:write_objects_to_db)
 
@@ -43,6 +47,7 @@ describe DbToFile::Uploader do
 
     it 'can be builded into models' do
       models = DbToFile::Uploader.new.send(:build_objects)
+      models.size.must_equal 2
       models.first.class.must_equal(User)
       models.last.class.must_equal(User)
 

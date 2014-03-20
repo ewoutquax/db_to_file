@@ -6,6 +6,7 @@ module DbToFile
 
     rake_tasks do
       load "tasks/unloader.rake"
+      load "tasks/uploader.rake"
     end
   end
 end

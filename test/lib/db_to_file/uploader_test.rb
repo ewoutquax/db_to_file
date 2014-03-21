@@ -28,6 +28,19 @@ describe DbToFile::Uploader do
     end
   end
 
+  describe 'merge_conflicts_present' do
+    let(:uploader) { DbToFile::Uploader.new }
+    let(:controller) { Minitest::Mock.new }
+
+    it 'invokes the version controller' do
+      controller.expect(:merge_conflicts_present?, true)
+      uploader.stub(:version_controller, controller) do
+        uploader.send(:merge_conflicts_present?).must_equal(true)
+      end
+      controller.verify
+    end
+  end
+
   describe 'objects' do
     after do
       User.last.delete

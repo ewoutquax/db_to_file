@@ -24,7 +24,7 @@ module DbToFile
       end
 
       def merge_conflicts_present?
-        false
+        version_controller.merge_conflicts_present?
       end
 
       def write_objects_to_db
@@ -82,6 +82,10 @@ module DbToFile
         end
 
         found_files
+      end
+
+      def version_controller
+        @version_controller ||= VersionController.new
       end
   end
 end

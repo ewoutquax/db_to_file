@@ -15,6 +15,11 @@ module DbToFile
       restore_stash
     end
 
+    def merge_conflicts_present?
+      out = SystemExecuter.new('git status --porcelain').execute.split("\n")
+      out.any?{|line| line[0..0] == 'U'}
+    end
+
     private
       def update_commit_stash
         new_files.each do |file|

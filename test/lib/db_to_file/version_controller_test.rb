@@ -89,4 +89,29 @@ describe DbToFile::VersionController do
     end
   end
 
+  describe 'merge_conflicts_present' do
+    let(:controller) { DbToFile::VersionController.new }
+    let(:executer) { Minitest::Mock.new }
+
+    before do
+      @output_without_merge_error = 'M  test/lib/db_to_file/uploader_test.rb'
+      @output_with_merge_error = 'U  test/lib/db_to_file/uploader_test.rb'
+    end
+
+    it 'return true, when merge-errors are found' do
+      DbToFile::SystemExecuter.expects(:new).with('git status --porcelain').returns(executer)
+
+      executer.expect(:execute, @output_with_merge_error)
+      controller.merge_conflicts_present?.must_equal(true)
+    end
+
+
+    it 'return false, when merge-errors are absent' do
+      DbToFile::SystemExecuter.expects(:new).with('git status --porcelain').returns(executer)
+
+      executer.expect(:execute, @output_without_merge_error)
+      controller.merge_conflicts_present?.must_equal(false)
+    end
+  end
+
 end

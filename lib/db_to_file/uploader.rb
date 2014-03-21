@@ -41,7 +41,7 @@ module DbToFile
           # break up file-path in 3 segments: model, id, field
           matches = model_field_file.scan(/\/([a-z]+)\/(\d+)\/([a-z_]+)/).flatten
           # determine model-class
-          model = matches.first.singularize.capitalize.constantize
+          model = matches.first.singularize.classify.constantize
           # find existing object
           object = objects.detect do |existing_object|
             existing_object.class == model && existing_object.id == matches[1].to_i

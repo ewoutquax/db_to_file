@@ -33,6 +33,9 @@ describe DbToFile::Unloader do
   describe 'build directory' do
     before do
       unloader = DbToFile::Unloader.new
+      unloader.stub(:config_file, 'test/fixtures/config.yml') do
+        unloader.send(:unload_tables)
+      end
       unloader.stub(:tables, ['users','settings']) do
         unloader.send(:unload_tables)
       end
@@ -51,19 +54,20 @@ describe DbToFile::Unloader do
     end
 
     it 'builds the directory for the records' do
-      File.directory?('db/db_to_file/users/1').must_equal true
-      File.directory?('db/db_to_file/users/2').must_equal true
+      File.directory?('db/db_to_file/users/ewout-quax_1').must_equal true
+      File.directory?('db/db_to_file/users/test-example_2').must_equal true
+      File.directory?('db/db_to_file/users/3').must_equal true
       File.directory?('db/db_to_file/settings/1').must_equal true
       File.directory?('db/db_to_file/settings/2').must_equal true
     end
 
     it 'builds the files for the record-files' do
-      File.file?('db/db_to_file/users/1/id').must_equal true
-      File.file?('db/db_to_file/users/1/name').must_equal true
+      File.file?('db/db_to_file/users/ewout-quax_1/id').must_equal true
+      File.file?('db/db_to_file/users/ewout-quax_1/name').must_equal true
       File.file?('db/db_to_file/settings/2/key').must_equal true
       File.file?('db/db_to_file/settings/2/value').must_equal true
 
-      File.read('db/db_to_file/users/1/name').must_equal 'Ewout Quax'
+      File.read('db/db_to_file/users/ewout-quax_1/name').must_equal 'Ewout Quax'
       File.read('db/db_to_file/settings/2/value').must_equal 'Value_2'
     end
   end

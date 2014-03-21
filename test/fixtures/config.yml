@@ -1,3 +1,4 @@
 tables:
-  - users
-  - settings
+  users:
+    directory_prefix: name
+  settings:

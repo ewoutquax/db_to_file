@@ -38,29 +38,36 @@ module DbToFile
       def build_objects
         objects = []
         read_files.each do |model_field_file|
-          # break up file-path in 3 segments: model, id, field
-          matches = model_field_file.scan(/\/([a-z]+)\/(\d+)\/([a-z_]+)/).flatten
-          # determine model-class
-          model = matches.first.singularize.classify.constantize
+          data_segments = extract_data_segments(model_field_file)
+          model = data_segments[:model]
           # find existing object
           object = objects.detect do |existing_object|
-            existing_object.class == model && existing_object.id == matches[1].to_i
+            existing_object.class == model && existing_object.id == data_segments[:id]
           end
           # build new object
           unless object
-            object = model.find(matches[1].to_i)
-            object.id = matches[1].to_i
+            object = model.find(data_segments[:id])
             objects << object
           end
           # set field-value to model
           value = File.read(model_field_file)
-          object.send("#{matches[2]}=", value)
+          object.send("#{data_segments[:field]}=", value)
         end
 
         objects
       end
 
-      def read_files
+    def extract_data_segments(model_field_file)
+      matches = model_field_file.split('/').last(3)
+
+      {
+        model: matches[0].singularize.classify.constantize,
+        id: matches[1].split('_').last.to_i,
+        field: matches[2]
+      }
+    end
+
+    def read_files
         files_in_dir(File.join('db', 'db_to_file'))
       end
 

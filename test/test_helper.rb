@@ -28,6 +28,7 @@ ActiveRecord::Base.connection.execute(create_settings)
 User.delete_all
 User.create(id: 1, name: 'Ewout Quax')
 User.create(id: 2, name: 'Test Example')
+User.create(id: 3, name: '')
 
 Setting.delete_all
 Setting.create(id: 1, key: 'key_1', value: 'Value_1')

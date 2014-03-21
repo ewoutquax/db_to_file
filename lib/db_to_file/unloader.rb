@@ -69,7 +69,7 @@ module DbToFile
         table = record.class.table_name
         row_name = nil
         row_name = "#{record.send(config['tables'][table]['directory_prefix']).parameterize}" if config['tables'][table].present?
-        [row_name, record.id].compact.join('_')
+        [row_name, record.id.to_s].compact.reject(&:empty?).join('_')
       end
 
       def config

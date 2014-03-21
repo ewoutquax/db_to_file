@@ -29,7 +29,7 @@ module DbToFile
       end
 
       def tables
-        config['tables']
+        config['tables'].keys
       end
 
       def unload_table(table)
@@ -55,7 +55,7 @@ module DbToFile
 
       def directory_for_record(record)
         table = record.class.table_name
-        "db/db_to_file/#{table}/#{record.id}"
+        "db/db_to_file/#{table}/#{record.send(config[table]['directory_prefix']).parameterize}_#{record.id}"
       end
 
       def config

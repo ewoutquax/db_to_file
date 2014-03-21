@@ -2,22 +2,11 @@ require_relative '../../test_helper'
 require 'fileutils'
 
 describe DbToFile::VersionController do
-  describe 'unloading' do
-    it 'calls the functions' do
-      unloader = DbToFile::Unloader.new
-      unloader.expects(:prepare_code_version)
-      unloader.expects(:unload_tables)
-      unloader.expects(:update_code_version)
-
-      unloader.unload
-    end
-  end
-
   describe 'prepare code-versioning' do
     it 'invokes the system-commander' do
       executer = DbToFile::SystemExecuter.new('ls')
       executer.expects(:execute).times(2)
-      DbToFile::SystemExecuter.expects(:new).with('git stash save').returns(executer)
+      DbToFile::SystemExecuter.expects(:new).with("git stash save 'db-to-file'").returns(executer)
       DbToFile::SystemExecuter.expects(:new).with('git pull').returns(executer)
       File::FileUtils.expects(:rm_rf)
 
@@ -27,10 +16,6 @@ describe DbToFile::VersionController do
 
   describe 'update_code_version' do
     it 'invokes all the functions' do
-      executer = DbToFile::SystemExecuter.new('')
-      executer.expects(:execute).times(1)
-      DbToFile::SystemExecuter.expects(:new).with('git stash pop').returns(executer)
-
       controller = DbToFile::VersionController.new
       controller.expects(:update_commit_stash)
       controller.expects(:commitable_files_present?).returns(true)
@@ -83,4 +68,25 @@ describe DbToFile::VersionController do
       DbToFile::VersionController.new.send(:restore_stash)
     end
   end
+
+  describe 'restore_local_stash' do
+    it 'invokes all the functions' do
+      controller = DbToFile::VersionController.new
+      controller.expects(:restore_stash)
+
+      controller.send(:restore_local_stash)
+    end
+
+    describe 'restore_stash' do
+      it 'invokes the correct command' do
+        executer = DbToFile::SystemExecuter.new('')
+        executer.expects(:execute).times(1)
+        DbToFile::SystemExecuter.expects(:new).with('git stash pop').returns(executer)
+
+        controller = DbToFile::VersionController.new
+        controller.send(:restore_stash)
+      end
+    end
+  end
+
 end

@@ -2,7 +2,7 @@ module DbToFile
   class Uploader
     def upload(commit_message)
       if can_continue?
-        Unloader.new.unload
+        invoke_unloader
       end
       if can_continue?
         update_code_version(commit_message)
@@ -15,8 +15,16 @@ module DbToFile
     end
 
     private
+      def invoke_unloader
+        Unloader.new.unload
+      end
+
       def can_continue?
-        true
+        !merge_conflicts_present?
+      end
+
+      def merge_conflicts_present?
+        false
       end
 
       def write_objects_to_db

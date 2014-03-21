@@ -4,11 +4,28 @@ require 'fileutils'
 describe DbToFile::Uploader do
   it 'invokes all the functions' do
     uploader = DbToFile::Uploader.new
-    uploader.expects(:check_merge_conflicts)
+    uploader.expects(:can_continue?).returns(true).times(2)
+    uploader.expects(:invoke_unloader)
     uploader.expects(:write_objects_to_db)
     uploader.expects(:update_code_version)
 
-    uploader.upload
+    uploader.upload('uploader_test')
+  end
+
+  describe 'can_continue' do
+    let(:uploader) { DbToFile::Uploader.new }
+
+    it 'return false, if merge conflicts are found' do
+      uploader.stub(:merge_conflicts_present?, true) do
+        uploader.send(:can_continue?).must_equal(false)
+      end
+    end
+
+    it 'return true, if no merge conflicts are found' do
+      uploader.stub(:merge_conflicts_present?, false) do
+        uploader.send(:can_continue?).must_equal(true)
+      end
+    end
   end
 
   describe 'objects' do

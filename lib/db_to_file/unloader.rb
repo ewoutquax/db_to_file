@@ -4,6 +4,7 @@ module DbToFile
       prepare_code_version
       unload_tables
       update_code_version
+      restore_local_stash
     end
 
     private
@@ -21,7 +22,13 @@ module DbToFile
       end
 
       def update_code_version
+        puts 'Start updating code version'
         version_controller.update_code_version
+        puts 'Done updating code version'
+      end
+
+      def restore_local_stash
+        version_controller.restore_local_stash
       end
 
       def version_controller

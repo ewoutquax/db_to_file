@@ -105,13 +105,21 @@ describe DbToFile::Uploader do
   end
 
   describe 'update_object_with_field_value' do
-    before do
-      write_file('db/db_to_file/users/1', 'name', 'Bruce Wayne')
-    end
+    let(:uploader) { DbToFile::Uploader.new }
 
     it 'with field value' do
+      uploader.expects(:file_value).with('db/db_to_file/users/1/name').returns('Bruce Wayne')
+
       object = User.new
-      DbToFile::Uploader.new.send(:update_object_with_field_value, object, 'name', 'db/db_to_file/users/1/name')
+      uploader.send(:update_object_with_field_value, object, 'name', 'db/db_to_file/users/1/name')
+      object.name.must_equal('Bruce Wayne')
+    end
+
+    it 'strips newline at end of field-value' do
+      uploader.expects(:file_value).with('db/db_to_file/users/1/name').returns("Bruce Wayne\n")
+
+      object = User.new
+      uploader.send(:update_object_with_field_value, object, 'name', 'db/db_to_file/users/1/name')
       object.name.must_equal('Bruce Wayne')
     end
   end

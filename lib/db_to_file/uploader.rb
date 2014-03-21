@@ -64,8 +64,13 @@ module DbToFile
       end
 
       def update_object_with_field_value(object, field, model_field_file)
-        value = File.read(model_field_file)
+        value = file_value(model_field_file)
+        value = value[0..-2] if value[-1] == "\n"
         object.send("#{field}=", value)
+      end
+
+      def file_value(model_field_file)
+        File.read(model_field_file)
       end
 
       def read_files

@@ -33,6 +33,9 @@ describe DbToFile::Unloader do
   describe 'build directory' do
     before do
       unloader = DbToFile::Unloader.new
+      unloader.stub(:config_file, 'test/fixtures/config.yml') do
+        unloader.send(:unload_tables)
+      end
       unloader.stub(:tables, ['users','settings']) do
         unloader.send(:unload_tables)
       end

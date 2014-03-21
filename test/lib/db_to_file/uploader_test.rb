@@ -122,5 +122,13 @@ describe DbToFile::Uploader do
       uploader.send(:update_object_with_field_value, object, 'name', 'db/db_to_file/users/1/name')
       object.name.must_equal('Bruce Wayne')
     end
+
+    it 'converts <NULL> to nil-value' do
+      uploader.expects(:file_value).with('db/db_to_file/users/1/name').returns("<NULL>\n")
+
+      object = User.new
+      uploader.send(:update_object_with_field_value, object, 'name', 'db/db_to_file/users/1/name')
+      object.name.must_equal(nil)
+    end
   end
 end

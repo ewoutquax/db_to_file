@@ -63,6 +63,7 @@ module DbToFile
       def update_object_with_field_value(object, field, model_field_file)
         value = file_value(model_field_file)
         value = value[0..-2] if value[-1] == "\n"
+        value = nil if value == '<NULL>'
         object.send("#{field}=", value)
       end
 

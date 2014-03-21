@@ -57,6 +57,7 @@ module DbToFile
       def build_files_for_record_fields(record)
         base_dir = directory_for_record(record)
         record.attributes.each do |field, value|
+          value = '<NULL>' if value.nil?
           file = File.join(base_dir, field)
           handle = File.open(file, 'w')
           handle.write(value)
@@ -75,7 +76,7 @@ module DbToFile
 
       def directory_prefix(record)
         table = record.class.table_name
-        "#{record.send(config_directory_prefix(table)).parameterize}" if config_directory_prefix(table).present?
+        "#{(record.send(config_directory_prefix(table)) || '').parameterize}" if config_directory_prefix(table).present?
       end
 
       def config

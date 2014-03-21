@@ -24,6 +24,7 @@ describe DbToFile::Unloader do
       unloader.expects(:prepare_code_version)
       unloader.expects(:unload_tables)
       unloader.expects(:update_code_version)
+      unloader.expects(:restore_local_stash)
 
       unloader.unload
     end

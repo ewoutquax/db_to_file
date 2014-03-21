@@ -103,6 +103,18 @@ describe DbToFile::Uploader do
       controller.verify
     end
   end
+
+  describe 'update_object_with_field_value' do
+    before do
+      write_file('db/db_to_file/users/1', 'name', 'Bruce Wayne')
+    end
+
+    it 'with field value' do
+      object = User.new
+      DbToFile::Uploader.new.send(:update_object_with_field_value, object, 'name', 'db/db_to_file/users/1/name')
+      object.name.must_equal('Bruce Wayne')
+    end
+  end
 end
 
 def write_file(dir, file, value)

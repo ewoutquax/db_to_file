@@ -57,11 +57,15 @@ module DbToFile
             objects << object
           end
           # set field-value to model
-          value = File.read(model_field_file)
-          object.send("#{matches[2]}=", value)
+          update_object_with_field_value(object, matches[2], model_field_file)
         end
 
         objects
+      end
+
+      def update_object_with_field_value(object, field, model_field_file)
+        value = File.read(model_field_file)
+        object.send("#{field}=", value)
       end
 
       def read_files

@@ -1,7 +1,7 @@
 module DbToFile
   class VersionController
     def prepare_code_version
-      SystemExecuter.new('git stash save').execute
+      SystemExecuter.new("git stash save 'db-to-file'").execute
       SystemExecuter.new('git pull').execute
       FileUtils.rm_rf('db/db_to_file')
     end
@@ -9,6 +9,9 @@ module DbToFile
     def update_code_version
       update_commit_stash
       commit_changes if commitable_files_present?
+    end
+
+    def restore_local_stash
       restore_stash
     end
 
@@ -26,11 +29,12 @@ module DbToFile
       end
 
       def commitable_files_present?
-        out = SystemExecuter.new('git status --porcelain')
+        out = SystemExecuter.new('git status --porcelain').execute
         out.split("\n").reject{|line| [' ', '?'].include?(line[0])}.any?
       end
 
       def commit_changes
+        puts 'Commit changes'
         git.commit('Customer changes')
       end
 

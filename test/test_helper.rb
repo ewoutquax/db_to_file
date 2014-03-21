@@ -6,7 +6,6 @@ require 'pry'
 require 'minitest/unit'
 require 'minitest/autorun'
 require "mocha/setup"
-require 'active_record'
 require 'turn'
 require_relative 'lib/user'
 require_relative 'lib/setting'
@@ -16,9 +15,6 @@ Turn.config do |c|
   c.format  = :outline
   c.natural = true
 end
-
-dbconfig = YAML::load(File.open('db/database.yml'))
-ActiveRecord::Base.establish_connection(dbconfig)
 
 drop_users      = 'drop table if exists `users`'
 drop_settings   = 'drop table if exists `settings`'

@@ -1,10 +1,24 @@
 module DbToFile
   class Uploader
-    def upload
+    def upload(commit_message)
+      if can_continue?
+        Unloader.new.unload
+      end
+      if can_continue?
+        update_code_version(commit_message)
+        write_objects_to_db
+      end
+    end
+
+    def force_upload
       write_objects_to_db
     end
 
     private
+      def can_continue?
+        true
+      end
+
       def write_objects_to_db
         objects.each(&:save!)
       end
@@ -26,7 +40,7 @@ module DbToFile
           end
           # build new object
           unless object
-            object = model.new
+            object = model.find(matches[1].to_i)
             object.id = matches[1].to_i
             objects << object
           end

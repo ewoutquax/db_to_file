@@ -4,7 +4,9 @@ require 'fileutils'
 describe DbToFile::Uploader do
   it 'invokes all the functions' do
     uploader = DbToFile::Uploader.new
+    uploader.expects(:check_merge_conflicts)
     uploader.expects(:write_objects_to_db)
+    uploader.expects(:update_code_version)
 
     uploader.upload
   end

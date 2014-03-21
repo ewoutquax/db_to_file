@@ -9,6 +9,7 @@ module DbToFile
     end
 
     def execute
+      puts "Execute command: #{@command}"
       `#{@command}`
     end
   end

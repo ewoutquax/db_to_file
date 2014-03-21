@@ -12,9 +12,12 @@ module DbToFile
       end
 
       def unload_tables
+        puts 'Start downloading tables'
         tables.each do |table|
+          puts "Downloading table #{table}"
           unload_table(table)
         end
+        puts 'Done downloading tables'
       end
 
       def update_code_version

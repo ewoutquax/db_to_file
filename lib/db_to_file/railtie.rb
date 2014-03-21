@@ -5,8 +5,7 @@ module DbToFile
     railtie_name :db_to_file
 
     rake_tasks do
-      load "tasks/unloader.rake"
-      load "tasks/uploader.rake"
+      load "tasks/db_to_file.rake"
     end
   end
 end

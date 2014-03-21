@@ -62,13 +62,12 @@ module DbToFile
 
       def directory_for_record(record)
         table = record.class.table_name
-
         "db/db_to_file/#{table}/#{row_name(record)}"
       end
 
       def row_name(record)
         table = record.class.table_name
-        row_name = ''
+        row_name = nil
         row_name = "#{record.send(config['tables'][table]['directory_prefix']).parameterize}" if config['tables'][table].present?
         [row_name, record.id].compact.join('_')
       end

@@ -16,6 +16,13 @@ describe DbToFile::Unloader do
         @unloader.send(:tables).must_equal(['users', 'settings'])
       end
     end
+
+    it 'can read prefix' do
+      @unloader.stub(:config_file, 'test/fixtures/config.yml') do
+        @unloader.send(:config_directory_prefix, 'users').must_equal('name')
+        @unloader.send(:config_directory_prefix, 'settings').must_equal(nil)
+      end
+    end
   end
 
   describe 'unloading' do
@@ -30,10 +37,11 @@ describe DbToFile::Unloader do
     end
   end
 
-  describe 'build directory' do
+  describe 'build directory for users with prefix' do
     before do
       unloader = DbToFile::Unloader.new
-      unloader.stub(:tables, ['users','settings']) do
+      unloader.stubs(:config_directory_prefix).returns('name')
+      unloader.stub(:tables, ['users']) do
         unloader.send(:unload_tables)
       end
     end
@@ -46,24 +54,46 @@ describe DbToFile::Unloader do
       File.directory?('db/db_to_file/users').must_equal true
     end
 
+    it 'builds the directory for the records' do
+      File.directory?('db/db_to_file/users/ewout-quax_1').must_equal true
+      File.directory?('db/db_to_file/users/test-example_2').must_equal true
+      File.directory?('db/db_to_file/users/3').must_equal true
+    end
+
+    it 'builds the files for the record-files' do
+      File.file?('db/db_to_file/users/ewout-quax_1/id').must_equal true
+      File.file?('db/db_to_file/users/ewout-quax_1/name').must_equal true
+
+      File.read('db/db_to_file/users/ewout-quax_1/name').must_equal 'Ewout Quax'
+    end
+  end
+
+  describe 'build directory for users without prefix' do
+    before do
+      unloader = DbToFile::Unloader.new
+      unloader.stubs(:config_directory_prefix).returns(nil)
+      unloader.stub(:tables, ['settings']) do
+        unloader.send(:unload_tables)
+      end
+    end
+
+    after do
+      FileUtils.rm_rf('db/db_to_file')
+    end
+
     it 'for the settings' do
       File.directory?('db/db_to_file/settings').must_equal true
     end
 
     it 'builds the directory for the records' do
-      File.directory?('db/db_to_file/users/1').must_equal true
-      File.directory?('db/db_to_file/users/2').must_equal true
       File.directory?('db/db_to_file/settings/1').must_equal true
       File.directory?('db/db_to_file/settings/2').must_equal true
     end
 
     it 'builds the files for the record-files' do
-      File.file?('db/db_to_file/users/1/id').must_equal true
-      File.file?('db/db_to_file/users/1/name').must_equal true
       File.file?('db/db_to_file/settings/2/key').must_equal true
       File.file?('db/db_to_file/settings/2/value').must_equal true
 
-      File.read('db/db_to_file/users/1/name').must_equal 'Ewout Quax'
       File.read('db/db_to_file/settings/2/value').must_equal 'Value_2'
     end
   end

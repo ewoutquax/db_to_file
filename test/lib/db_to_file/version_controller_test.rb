@@ -26,7 +26,10 @@ describe DbToFile::VersionController do
 
     describe 'update commit_stash' do
       before do
-        DbToFile::Unloader.new.send(:unload_table, 'users')
+        write_file('db/db_to_file/users/ewout-quax_1', 'id', '1')
+        write_file('db/db_to_file/users/ewout-quax_1', 'name', 'Ewout Quax')
+        write_file('db/db_to_file/users/test-example_2', 'id', '2')
+        write_file('db/db_to_file/users/test-example_2', 'name', 'Test Example')
       end
 
       after do
@@ -36,11 +39,10 @@ describe DbToFile::VersionController do
       it 'git adds new records' do
         executer = DbToFile::SystemExecuter.new('')
         executer.expects(:execute).times(4)
-
-        DbToFile::SystemExecuter.expects(:new).with('git add db/db_to_file/users/1/id').returns(executer)
-        DbToFile::SystemExecuter.expects(:new).with('git add db/db_to_file/users/1/name').returns(executer)
-        DbToFile::SystemExecuter.expects(:new).with('git add db/db_to_file/users/2/id').returns(executer)
-        DbToFile::SystemExecuter.expects(:new).with('git add db/db_to_file/users/2/name').returns(executer)
+        DbToFile::SystemExecuter.expects(:new).with('git add db/db_to_file/users/ewout-quax_1/id').returns(executer)
+        DbToFile::SystemExecuter.expects(:new).with('git add db/db_to_file/users/ewout-quax_1/name').returns(executer)
+        DbToFile::SystemExecuter.expects(:new).with('git add db/db_to_file/users/test-example_2/id').returns(executer)
+        DbToFile::SystemExecuter.expects(:new).with('git add db/db_to_file/users/test-example_2/name').returns(executer)
 
         DbToFile::VersionController.new.send(:update_commit_stash)
       end
@@ -123,5 +125,4 @@ describe DbToFile::VersionController do
       controller.merge_conflicts_present?.must_equal(false)
     end
   end
-
 end

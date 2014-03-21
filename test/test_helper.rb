@@ -28,7 +28,17 @@ ActiveRecord::Base.connection.execute(create_settings)
 User.delete_all
 User.create(id: 1, name: 'Ewout Quax')
 User.create(id: 2, name: 'Test Example')
+User.create(id: 3, name: '')
 
 Setting.delete_all
 Setting.create(id: 1, key: 'key_1', value: 'Value_1')
 Setting.create(id: 2, key: 'key_2', value: 'Value_2')
+
+def write_file(dir, file, value)
+  FileUtils.mkdir_p(dir)
+  full_file = File.join(dir, file)
+
+  handle = File.open(full_file, 'w')
+  handle.write(value)
+  handle.close
+end

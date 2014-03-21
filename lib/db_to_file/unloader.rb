@@ -39,11 +39,11 @@ module DbToFile
         config['tables'].keys
       end
 
-    def config_directory_prefix(table)
-      config['tables'][table]['directory_prefix'] if config['tables'][table].present?
-    end
+      def config_directory_prefix(table)
+        config['tables'][table]['directory_prefix'] if config['tables'][table].present?
+      end
 
-    def unload_table(table)
+      def unload_table(table)
         table.singularize.classify.constantize.all.each do |record|
           build_directory_for_record(record)
           build_files_for_record_fields(record)
@@ -78,7 +78,7 @@ module DbToFile
         "#{record.send(config_directory_prefix(table)).parameterize}" if config_directory_prefix(table).present?
       end
 
-    def config
+      def config
         @config ||= load_config
       end
 

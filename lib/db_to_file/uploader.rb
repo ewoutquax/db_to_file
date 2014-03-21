@@ -5,8 +5,8 @@ module DbToFile
         invoke_unloader
       end
       if can_continue?
-        update_code_version(commit_message)
         write_objects_to_db
+        update_code_version(commit_message)
       end
     end
 
@@ -29,6 +29,10 @@ module DbToFile
 
       def write_objects_to_db
         objects.each(&:save!)
+      end
+
+      def update_code_version(commit_message)
+        version_controller.update_code_version(commit_message)
       end
 
       def objects

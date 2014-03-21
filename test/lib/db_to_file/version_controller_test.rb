@@ -49,15 +49,25 @@ describe DbToFile::VersionController do
       it 'git adds modified records'
     end
 
-    it 'git commit changes' do
-      git = Minitest::Mock.new
+    describe 'git commit changes' do
+      let(:git) { Minitest::Mock.new }
+      let(:controller) { DbToFile::VersionController.new }
 
-      controller = DbToFile::VersionController.new
-      controller.expects(:git).returns(git)
+      it 'with custom commit message' do
+        controller.expects(:git).returns(git)
 
-      git.expect(:commit, nil, ['Customer changes'])
-      controller.send(:commit_changes)
-      git.verify
+        git.expect(:commit, nil, ['custom commit message'])
+        controller.send(:commit_changes, 'custom commit message')
+        git.verify
+      end
+
+      it 'with default commit message' do
+        controller.expects(:git).returns(git)
+
+        git.expect(:commit, nil, ['DbToFile: changes by customer'])
+        controller.send(:commit_changes, nil)
+        git.verify
+      end
     end
 
     it 'restores the stash' do

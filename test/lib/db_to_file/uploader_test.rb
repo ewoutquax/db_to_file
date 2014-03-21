@@ -4,6 +4,7 @@ require 'fileutils'
 describe DbToFile::Uploader do
   it 'invokes all the functions' do
     uploader = DbToFile::Uploader.new
+
     uploader.expects(:can_continue?).returns(true).times(2)
     uploader.expects(:invoke_unloader)
     uploader.expects(:write_objects_to_db)
@@ -87,6 +88,19 @@ describe DbToFile::Uploader do
       user_2 = models.detect{|m| m.id == 2}
       user_1.name.must_equal 'Ewout Quax'
       user_2.name.must_equal 'Test Example'
+    end
+  end
+
+  describe 'update_code_version' do
+    let(:uploader) { DbToFile::Uploader.new }
+    let(:controller) { Minitest::Mock.new }
+
+    it 'invokes the version-controller, with a commit message' do
+      uploader.expects(:version_controller).returns(controller)
+
+      controller.expect(:update_code_version, true, ['commit via test'])
+      uploader.send(:update_code_version, 'commit via test')
+      controller.verify
     end
   end
 end

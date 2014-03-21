@@ -1,14 +1,16 @@
 module DbToFile
   class VersionController
+    DEFAULT_COMMIT_MESSAGE = 'DbToFile: changes by customer'
+
     def prepare_code_version
       SystemExecuter.new("git stash save 'db-to-file'").execute
       SystemExecuter.new('git pull').execute
       FileUtils.rm_rf('db/db_to_file')
     end
 
-    def update_code_version
+    def update_code_version(commit_message = nil)
       update_commit_stash
-      commit_changes if commitable_files_present?
+      commit_changes(commit_message) if commitable_files_present?
     end
 
     def restore_local_stash
@@ -38,9 +40,10 @@ module DbToFile
         out.split("\n").reject{|line| [' ', '?'].include?(line[0])}.any?
       end
 
-      def commit_changes
+      def commit_changes(commit_message)
         puts 'Commit changes'
-        git.commit('Customer changes')
+        message = commit_message || DEFAULT_COMMIT_MESSAGE
+        git.commit(message)
       end
 
       def restore_stash

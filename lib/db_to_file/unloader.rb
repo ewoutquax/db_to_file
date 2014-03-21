@@ -33,7 +33,7 @@ module DbToFile
       end
 
       def unload_table(table)
-        table.singularize.capitalize.constantize.all.each do |record|
+        table.singularize.classify.all.each do |record|
           build_directory_for_record(record)
           build_files_for_record_fields(record)
         end

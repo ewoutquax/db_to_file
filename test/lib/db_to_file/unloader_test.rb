@@ -16,6 +16,13 @@ describe DbToFile::Unloader do
         @unloader.send(:tables).must_equal(['users', 'settings'])
       end
     end
+
+    it 'can read prefix' do
+      @unloader.stub(:config_file, 'test/fixtures/config.yml') do
+        @unloader.send(:config_directory_prefix, 'users').must_equal('name')
+        @unloader.send(:config_directory_prefix, 'settings').must_equal(nil)
+      end
+    end
   end
 
   describe 'unloading' do

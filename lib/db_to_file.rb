@@ -1,4 +1,5 @@
 require 'active_record'
+require 'active_support/inflector'
 require 'git'
 require 'db_to_file/version'
 require 'db_to_file/version_controller'

@@ -64,6 +64,7 @@ module DbToFile
         value = file_value(model_field_file)
         value = value[0..-2] if value[-1] == "\n"
         value = nil if value == '<NULL>'
+        value = YAML.load(value) if object.class.serialized_attributes.include?(field)
         object.send("#{field}=", value)
       end
 

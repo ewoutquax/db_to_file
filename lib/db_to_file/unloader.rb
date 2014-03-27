@@ -44,10 +44,9 @@ module DbToFile
       end
 
       def unload_table(table)
-        model = table.singularize.classify.constantize
         table.singularize.classify.constantize.all.each do |record|
           build_directory_for_record(record)
-          build_files_for_record_fields(model, record)
+          build_files_for_record_fields(record)
         end
       end
 
@@ -55,11 +54,10 @@ module DbToFile
         FileUtils.mkdir_p(directory_for_record(record))
       end
 
-      def build_files_for_record_fields(model, record)
+      def build_files_for_record_fields(record)
         base_dir = directory_for_record(record)
-        record.attributes.each do |field, value|
-          value = '<NULL>' if value.nil?
-          value = value.to_yaml if model.serialized_attributes.include?(field)
+        normalized_hash = DbToFile::ValuesNormalizer::ObjectToHash.new(record).normalize
+        normalized_hash.each_pair do |field, value|
           file = File.join(base_dir, field)
           handle = File.open(file, 'w')
           handle.write(value)

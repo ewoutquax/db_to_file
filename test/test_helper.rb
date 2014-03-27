@@ -31,7 +31,7 @@ User.create(id: 2, name: 'Test Example')
 User.create(id: 3, name: '')
 
 Setting.delete_all
-Setting.create(id: 1, key: 'key_1', value: 'Value_1')
+Setting.create(id: 1, key: 'key_1', value: ['Value_1'])
 Setting.create(id: 2, key: 'key_2', value: nil)
 
 def write_file(dir, file, value)

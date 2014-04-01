@@ -50,7 +50,7 @@ module DbToFile
           end
           # build new object
           unless object
-            object = model.find(data_segments[:id])
+            object = model.find_by(id: data_segments[:id]) || model.new(id: data_segments[:id])
             objects << object
           end
           # set field-value to model
@@ -65,7 +65,7 @@ module DbToFile
         value = value[0..-2] if value[-1] == "\n"
         value = nil if value == '<NULL>'
         value = YAML.load(value) if object.class.serialized_attributes.include?(field)
-        object.send("#{field}=", value)
+        object.send("#{field}=", value) if object.respond_to?(field.to_sym)
       end
 
       def file_value(model_field_file)

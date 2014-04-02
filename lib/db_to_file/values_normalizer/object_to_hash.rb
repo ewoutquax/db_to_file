@@ -19,6 +19,7 @@ module DbToFile
           value = convert_yaml(value)
           value = convert_nil_value(value)
           value = convert_integer_to_string(value)
+          value = add_trailing_newline(value)
         end
 
         def convert_yaml(value)
@@ -29,12 +30,16 @@ module DbToFile
           @object.class.serialized_attributes.keys.include?(field.to_s)
         end
 
-
         def convert_nil_value(value)
           (value.nil?) ? '<NULL>' : value
         end
+
         def convert_integer_to_string(integer)
           "#{integer}"
+        end
+
+        def add_trailing_newline(string)
+          (string[-1] == "\n") ? string : "#{string}\n"
         end
     end
   end

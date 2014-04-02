@@ -64,7 +64,7 @@ describe DbToFile::Unloader do
       File.file?('db/db_to_file/users/ewout-quax_1/id').must_equal true
       File.file?('db/db_to_file/users/ewout-quax_1/name').must_equal true
 
-      File.read('db/db_to_file/users/ewout-quax_1/name').must_equal 'Ewout Quax'
+      File.read('db/db_to_file/users/ewout-quax_1/name').must_equal "Ewout Quax\n"
     end
   end
 
@@ -94,7 +94,7 @@ describe DbToFile::Unloader do
       File.file?('db/db_to_file/settings/2/key').must_equal true
       File.file?('db/db_to_file/settings/2/value').must_equal true
 
-      File.read('db/db_to_file/settings/2/value').must_equal '<NULL>'
+      File.read('db/db_to_file/settings/2/value').must_equal "<NULL>\n"
     end
   end
 

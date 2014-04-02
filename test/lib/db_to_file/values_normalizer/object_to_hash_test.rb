@@ -9,13 +9,14 @@ describe DbToFile::ValuesNormalizer::ObjectToHash do
     end
 
     it 'converts an object, to a hash with writeable values' do
-      normalizer.normalize.must_equal({'id'=>'1', 'key'=>'<NULL>', 'value'=>"---\n- blabla\n"})
+      normalizer.normalize.must_equal({'id'=>"1\n", 'key'=>"<NULL>\n", 'value'=>"---\n- blabla\n"})
     end
 
     it 'invokes all the functions for a field' do
+      normalizer.expects(:convert_yaml)
       normalizer.expects(:convert_nil_value)
       normalizer.expects(:convert_integer_to_string)
-      normalizer.expects(:convert_yaml)
+      normalizer.expects(:add_trailing_newline)
 
       normalizer.send(:normalize_field_value, 'bla')
     end
@@ -51,6 +52,16 @@ describe DbToFile::ValuesNormalizer::ObjectToHash do
       it 'returns the original string' do
         normalizer.expects(:serialized_attribute?).returns(false)
         normalizer.send(:convert_yaml, "Test\nString").must_equal("Test\nString")
+      end
+    end
+
+    describe 'add trailing newline' do
+      it 'adds a newline, when none is present' do
+        normalizer.send(:add_trailing_newline, 'Test String').must_equal("Test String\n")
+      end
+
+      it 'return original string' do
+        normalizer.send(:add_trailing_newline, "Test String\n").must_equal("Test String\n")
       end
     end
   end

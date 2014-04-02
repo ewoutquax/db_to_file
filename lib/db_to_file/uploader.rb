@@ -74,7 +74,7 @@ module DbToFile
 
         {
           model: matches[0].singularize.classify.constantize,
-          id: matches[1].split('_').last.to_i,
+          id:    matches[1].split('_').last.to_i,
           field: matches[2]
         }
       end

@@ -6,7 +6,7 @@ module DbToFile
       end
 
       def normalize(fieldname, value)
-        if object.respond_to?(field.to_sym)
+        if @object.respond_to?(fieldname.to_sym)
           normalized_value = normalize_field_value(fieldname, value)
           @object.send("#{fieldname}=", normalized_value)
         end

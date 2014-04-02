@@ -6,15 +6,14 @@ require 'db_to_file/version_controller'
 require 'db_to_file/unloader'
 require 'db_to_file/uploader'
 require 'db_to_file/values_normalizer/object_to_hash'
-require 'db_to_file/values_normalizer/hash_to_object'
+require 'db_to_file/values_normalizer/value_into_object'
 require 'db_to_file/system_executer'
 
 module DbToFile
   if defined?(Rails)
     require 'db_to_file/railtie'
-    dbconfig = YAML::load(File.open("#{Dir.pwd}/config/database.yml"))[Rails.env]
   else
     dbconfig = YAML::load(File.open('db/database.yml'))
+    ActiveRecord::Base.establish_connection(dbconfig)
   end
-  ActiveRecord::Base.establish_connection(dbconfig)
 end

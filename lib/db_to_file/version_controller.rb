@@ -1,7 +1,5 @@
 module DbToFile
   class VersionController
-    DEFAULT_COMMIT_MESSAGE = 'DbToFile: changes by customer'
-
     def prepare_code_version
       SystemExecuter.new("git stash save 'db-to-file'").execute
       SystemExecuter.new('git pull').execute
@@ -23,6 +21,8 @@ module DbToFile
     end
 
     private
+      DEFAULT_COMMIT_MESSAGE = 'DbToFile: changes by customer'
+
       def update_commit_stash
         new_files.each do |file|
           SystemExecuter.new("git add #{file}").execute if table_file?(file)

@@ -50,7 +50,7 @@ module DbToFile
           end
           # build new object
           unless object
-            object = model.find(data_segments[:id])
+            object = model.find_by(id: data_segments[:id]) || model.new(id: data_segments[:id])
             objects << object
           end
           # set field-value to model

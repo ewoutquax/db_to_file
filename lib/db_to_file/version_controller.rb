@@ -20,6 +20,10 @@ module DbToFile
       out.any?{|line| line[0..0] == 'U'}
     end
 
+    def get_modified_file_list
+      modified_files
+    end
+
     private
       DEFAULT_COMMIT_MESSAGE = 'DbToFile: changes by customer'
 

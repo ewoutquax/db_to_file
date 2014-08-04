@@ -38,7 +38,8 @@ describe DbToFile::VersionController do
 
       it 'git adds new records' do
         executer = DbToFile::SystemExecuter.new('')
-        executer.expects(:execute).times(4)
+        executer.expects(:execute).times(5)
+        DbToFile::SystemExecuter.expects(:new).with('git status --porcelain').returns(executer)
         DbToFile::SystemExecuter.expects(:new).with('git add db/db_to_file/users/ewout-quax_1/id').returns(executer)
         DbToFile::SystemExecuter.expects(:new).with('git add db/db_to_file/users/ewout-quax_1/name').returns(executer)
         DbToFile::SystemExecuter.expects(:new).with('git add db/db_to_file/users/test-example_2/id').returns(executer)
@@ -46,9 +47,6 @@ describe DbToFile::VersionController do
 
         DbToFile::VersionController.new.send(:update_commit_stash)
       end
-
-      it 'git removes deleted records'
-      it 'git adds modified records'
     end
 
     describe 'git commit changes' do

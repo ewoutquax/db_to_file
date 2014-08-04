@@ -41,6 +41,7 @@ describe DbToFile::Unloader do
     before do
       unloader = DbToFile::Unloader.new
       unloader.stubs(:config_directory_prefix).returns('name')
+      unloader.stubs(:config_ignore_columns).returns(nil)
       unloader.stub(:tables, ['users']) do
         unloader.send(:unload_tables)
       end
@@ -72,6 +73,7 @@ describe DbToFile::Unloader do
     before do
       unloader = DbToFile::Unloader.new
       unloader.stubs(:config_directory_prefix).returns(nil)
+      unloader.stubs(:config_ignore_columns).returns(nil)
       unloader.stub(:tables, ['settings']) do
         unloader.send(:unload_tables)
       end

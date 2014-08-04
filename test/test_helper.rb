@@ -10,7 +10,8 @@ require 'turn'
 require_relative 'lib/user'
 require_relative 'lib/setting'
 require File.expand_path('../../lib/db_to_file.rb', __FILE__)
-
+require 'minitest/reporters'
+MiniTest::Reporters.use!
 Turn.config do |c|
   c.format  = :outline
   c.natural = true

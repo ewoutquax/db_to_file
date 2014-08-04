@@ -43,10 +43,14 @@ module DbToFile
         config['tables'][table]['directory_prefix'] if config['tables'][table].present?
       end
 
+      def config_ignore_columns(table)
+        config['tables'][table]['ignore_columns'] if config['tables'][table].present?
+      end
+
       def unload_table(table)
         table.singularize.classify.constantize.all.each do |record|
           build_directory_for_record(record)
-          build_files_for_record_fields(record, config['tables'][table]['ignore_columns'])
+          build_files_for_record_fields(record, config_ignore_columns(table))
         end
       end
 

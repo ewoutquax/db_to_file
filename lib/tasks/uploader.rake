@@ -13,12 +13,21 @@ namespace :db_to_file do
     force_upload_files
   end
 
+  desc 'Force uploading only changed files in database, without checks'
+  task :force_changed => :environment do |t, args|
+    force_upload_changed_files
+  end
+
   private
     def upload_files(commit_message)
       DbToFile::Uploader.new.upload(commit_message)
     end
 
     def force_upload_files
+      DbToFile::Uploader.new.force_upload
+    end
+
+    def force_upload_changed_files
       DbToFile::Uploader.new.force_upload
     end
 

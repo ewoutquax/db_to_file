@@ -46,7 +46,7 @@ module DbToFile
       def unload_table(table)
         table.singularize.classify.constantize.all.each do |record|
           build_directory_for_record(record)
-          build_files_for_record_fields(record)
+          build_files_for_record_fields(record, config['tables'][table]['ignore_columns'])
         end
       end
 
@@ -54,10 +54,10 @@ module DbToFile
         FileUtils.mkdir_p(directory_for_record(record))
       end
 
-      def build_files_for_record_fields(record)
+      def build_files_for_record_fields(record, ignore_columns)
         base_dir = directory_for_record(record)
         normalized_hash = DbToFile::ValuesNormalizer::ObjectToHash.new(record).normalize
-        normalized_hash.each_pair do |field, value|
+        normalized_hash.except(*ignore_columns).each_pair do |field, value|
           file = File.join(base_dir, field)
           handle = File.open(file, 'w')
           handle.write(value)

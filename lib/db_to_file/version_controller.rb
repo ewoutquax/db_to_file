@@ -24,6 +24,7 @@ module DbToFile
       DEFAULT_COMMIT_MESSAGE = 'DbToFile: changes by customer'
 
       def update_commit_stash
+        SystemExecuter.new('git status --porcelain').execute
         new_files.each do |file|
           SystemExecuter.new("git add #{file}").execute if table_file?(file)
         end

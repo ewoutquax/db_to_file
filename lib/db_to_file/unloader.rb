@@ -44,7 +44,11 @@ module DbToFile
       end
 
       def config_field_extension(table, field)
-        config['tables'][table]['field_extensions'][field] if config['tables'][table]['field_extensions'][field].present?
+        begin
+          config['tables'][table]['field_extensions'][field]
+        rescue NoMethodError
+          nil
+        end
       end
 
       def config_ignore_columns(table)

@@ -43,6 +43,10 @@ module DbToFile
         config['tables'][table]['directory_prefix'] if config['tables'][table].present?
       end
 
+      def config_field_extension(table, field)
+        config['tables'][table]['field_extensions'][field] if config['tables'][table]['field_extensions'][field].present?
+      end
+
       def config_ignore_columns(table)
         config['tables'][table]['ignore_columns'] if config['tables'][table].present?
       end
@@ -62,16 +66,28 @@ module DbToFile
         base_dir = directory_for_record(record)
         normalized_hash = DbToFile::ValuesNormalizer::ObjectToHash.new(record).normalize
         normalized_hash.except(*ignore_columns).each_pair do |field, value|
-          file = File.join(base_dir, field)
-          handle = File.open(file, 'w')
+          file_name = file_with_extension(table(record), field)
+          full_file_path = File.join(base_dir, file_name)
+          handle = File.open(full_file_path, 'w')
           handle.write(value)
           handle.close
         end
       end
 
+      def file_with_extension(table, field)
+        if (extension = config_field_extension(table, field)).present?
+          "#{field}.#{extension}"
+        else
+          field
+        end
+      end
+
       def directory_for_record(record)
-        table = record.class.table_name
-        "db/db_to_file/#{table}/#{row_name(record)}"
+        "db/db_to_file/#{table(record)}/#{row_name(record)}"
+      end
+
+      def table(record)
+        record.class.table_name
       end
 
       def row_name(record)

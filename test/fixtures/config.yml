@@ -1,4 +1,6 @@
 tables:
   users:
     directory_prefix: name
+    field_extensions:
+      name: 'txt'
   settings:

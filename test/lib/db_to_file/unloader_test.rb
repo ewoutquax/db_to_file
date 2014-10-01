@@ -17,10 +17,17 @@ describe DbToFile::Unloader do
       end
     end
 
-    it 'can read prefix' do
+    it 'can read directory prefix' do
       @unloader.stub(:config_file, 'test/fixtures/config.yml') do
         @unloader.send(:config_directory_prefix, 'users').must_equal('name')
         @unloader.send(:config_directory_prefix, 'settings').must_equal(nil)
+      end
+    end
+
+    it 'can read file-extensions' do
+      @unloader.stub(:config_file, 'test/fixtures/config.yml') do
+        @unloader.send(:config_field_extension, 'users', 'name').must_equal('txt')
+        @unloader.send(:config_field_extension, 'users', 'id').must_equal(nil)
       end
     end
   end
@@ -42,6 +49,8 @@ describe DbToFile::Unloader do
       unloader = DbToFile::Unloader.new
       unloader.stubs(:config_directory_prefix).returns('name')
       unloader.stubs(:config_ignore_columns).returns(nil)
+      unloader.stubs(:config_field_extension).returns(nil)
+      unloader.expects(:config_field_extension).with('users', 'name').returns('txt')
       unloader.stub(:tables, ['users']) do
         unloader.send(:unload_tables)
       end
@@ -63,9 +72,9 @@ describe DbToFile::Unloader do
 
     it 'builds the files for the record-files' do
       File.file?('db/db_to_file/users/ewout-quax_1/id').must_equal true
-      File.file?('db/db_to_file/users/ewout-quax_1/name').must_equal true
+      File.file?('db/db_to_file/users/ewout-quax_1/name.txt').must_equal true
 
-      File.read('db/db_to_file/users/ewout-quax_1/name').must_equal "Ewout Quax\n"
+      File.read('db/db_to_file/users/ewout-quax_1/name.txt').must_equal "Ewout Quax\n"
     end
   end
 
@@ -74,6 +83,7 @@ describe DbToFile::Unloader do
       unloader = DbToFile::Unloader.new
       unloader.stubs(:config_directory_prefix).returns(nil)
       unloader.stubs(:config_ignore_columns).returns(nil)
+      unloader.stubs(:config_field_extension).returns(nil)
       unloader.stub(:tables, ['settings']) do
         unloader.send(:unload_tables)
       end

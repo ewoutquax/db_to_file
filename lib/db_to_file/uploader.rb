@@ -88,7 +88,7 @@ module DbToFile
       {
           model: matches[0].singularize.classify.constantize,
           id:    matches[1].split('_').last.to_i,
-          field: matches[2]
+          field: strip_extension(matches[2])
       }
     end
 
@@ -119,5 +119,10 @@ module DbToFile
     def version_controller
       @version_controller ||= VersionController.new
     end
+
+    private
+      def strip_extension(file_with_extension)
+        file_with_extension.split('.')[0]
+      end
   end
 end

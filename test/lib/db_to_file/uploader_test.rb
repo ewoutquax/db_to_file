@@ -61,9 +61,9 @@ describe DbToFile::Uploader do
   describe 'unloaded files' do
     before do
       write_file('db/db_to_file/users/ewout-quax_1', 'id', '1')
-      write_file('db/db_to_file/users/ewout-quax_1', 'name', 'Ewout Quax')
+      write_file('db/db_to_file/users/ewout-quax_1', 'name.txt', 'Ewout Quax')
       write_file('db/db_to_file/users/test-example_2', 'id', '2')
-      write_file('db/db_to_file/users/test-example_2', 'name', 'Test Example')
+      write_file('db/db_to_file/users/test-example_2', 'name.txt', 'Test Example')
     end
 
     after do
@@ -73,9 +73,9 @@ describe DbToFile::Uploader do
     it 'can be read' do
       files = DbToFile::Uploader.new.send(:read_files)
       files.include?('db/db_to_file/users/ewout-quax_1/id').must_equal true
-      files.include?('db/db_to_file/users/ewout-quax_1/name').must_equal true
+      files.include?('db/db_to_file/users/ewout-quax_1/name.txt').must_equal true
       files.include?('db/db_to_file/users/test-example_2/id').must_equal true
-      files.include?('db/db_to_file/users/test-example_2/name').must_equal true
+      files.include?('db/db_to_file/users/test-example_2/name.txt').must_equal true
     end
 
     it 'can be builded into models' do
@@ -129,6 +129,17 @@ describe DbToFile::Uploader do
       object = User.new
       uploader.send(:update_object_with_field_value, object, 'name', 'db/db_to_file/users/1/name')
       object.name.must_equal(nil)
+    end
+  end
+
+  describe 'extract_data_segments' do
+    it 'splits the full-file-path into segments' do
+      uploader = DbToFile::Uploader.new
+      segments = uploader.send(:extract_data_segments, '/db/db_to_files/users/ewout-quax_1/name.txt')
+
+      segments[:model].must_equal User
+      segments[:id].must_equal 1
+      segments[:field].must_equal 'name'
     end
   end
 end

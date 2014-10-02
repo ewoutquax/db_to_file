@@ -1,5 +1,11 @@
 module DbToFile
   class Unloader
+    def initialize
+      # Load config and build database connection, before stashing possible changes
+      @config ||= load_config
+      ActiveRecord::Base.connection.select('show tables')
+    end
+
     def unload
       prepare_code_version
       unload_tables

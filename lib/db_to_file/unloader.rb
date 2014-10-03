@@ -2,15 +2,21 @@ module DbToFile
   class Unloader
     def initialize
       # Load config and build database connection, before stashing possible changes
-      @config ||= load_config
-      ActiveRecord::Base.connection.select('show tables')
+      begin
+        config.data
+      rescue Errno::ENOENT
+      end
+      begin
+        ActiveRecord::Base.connection.select('show tables')
+      rescue NoMethodError
+      end
     end
 
     def unload
-      prepare_code_version
+      # prepare_code_version
       unload_tables
-      update_code_version
-      restore_local_stash
+      # update_code_version
+      # restore_local_stash
     end
 
     private
@@ -20,9 +26,9 @@ module DbToFile
 
       def unload_tables
         puts 'Start downloading tables'
-        tables.each do |table|
-          puts "Downloading table #{table}"
-          unload_table(table)
+        tables.each do |table_name|
+          puts "Downloading table '#{table_name}'"
+          Table.new(table_name, self).unload
         end
         puts 'Done downloading tables'
       end
@@ -42,83 +48,110 @@ module DbToFile
       end
 
       def tables
-        config['tables'].keys
-      end
-
-      def config_directory_prefix(table)
-        config['tables'][table]['directory_prefix'] if config['tables'][table].present?
-      end
-
-      def config_field_extension(table, field)
-        begin
-          config['tables'][table]['field_extensions'][field]
-        rescue NoMethodError
-          nil
-        end
-      end
-
-      def config_ignore_columns(table)
-        config['tables'][table]['ignore_columns'] if config['tables'][table].present?
-      end
-
-      def unload_table(table)
-        table.singularize.classify.constantize.all.each do |record|
-          build_directory_for_record(record)
-          build_files_for_record_fields(record, config_ignore_columns(table))
-        end
-      end
-
-      def build_directory_for_record(record)
-        FileUtils.mkdir_p(directory_for_record(record))
-      end
-
-      def build_files_for_record_fields(record, ignore_columns)
-        base_dir = directory_for_record(record)
-        normalized_hash = DbToFile::ValuesNormalizer::ObjectToHash.new(record).normalize
-        normalized_hash.except(*ignore_columns).each_pair do |field, value|
-          file_name = file_with_extension(table(record), field)
-          full_file_path = File.join(base_dir, file_name)
-          handle = File.open(full_file_path, 'w')
-          handle.write(value)
-          handle.close
-        end
-      end
-
-      def file_with_extension(table, field)
-        if (extension = config_field_extension(table, field)).present?
-          "#{field}.#{extension}"
-        else
-          field
-        end
-      end
-
-      def directory_for_record(record)
-        "db/db_to_file/#{table(record)}/#{row_name(record)}"
-      end
-
-      def table(record)
-        record.class.table_name
-      end
-
-      def row_name(record)
-        [directory_prefix(record), record.id.to_s].compact.reject(&:empty?).join('_')
-      end
-
-      def directory_prefix(record)
-        table = record.class.table_name
-        "#{(record.send(config_directory_prefix(table)) || '').parameterize}" if config_directory_prefix(table).present?
+        config.tables
       end
 
       def config
-        @config ||= load_config
+        Config.instance
       end
 
-      def load_config
-        YAML::load(File.read(config_file))
-      end
+      class Table
+        def initialize(table_name, unloader)
+          @table    = table_name.singularize.classify.constantize
+          @unloader = unloader
+        end
 
-      def config_file
-        'config/db_to_file.yml'
+        def unload
+          @table.all.each do |row|
+            Record.new(row, self).fields_to_files
+          end
+        end
+
+        private
+          class Record
+            def initialize(row, table)
+              @row   = row
+              @table = table
+            end
+
+            def fields_to_files
+              build_directory
+
+              normalized_hash = DbToFile::ValuesNormalizer::ObjectToHash.new(@row).normalize
+              normalized_hash.except(*ignore_columns).each_pair do |field_name, value|
+                Field.new(field_name, self).write_value(value)
+              end
+            end
+
+            private
+              def build_directory
+                FileUtils.mkdir_p(base_dir)
+              end
+
+              def ignore_columns
+                config.ignore_columns(table_name)
+              end
+
+              def base_dir
+                "db/db_to_file/#{table_name}/#{row_name}"
+              end
+
+              def row_name
+                [directory_prefix, @row.id.to_s].compact.reject(&:empty?).join('_')
+              end
+
+              def directory_prefix
+                if config_directory_prefix.present?
+                  (@row.send(config_directory_prefix) || '').parameterize
+                end
+              end
+
+              def config_directory_prefix
+                config.directory_prefix(table_name)
+              end
+
+              def table_name
+                @row.class.table_name
+              end
+
+              def config
+                Config.instance
+              end
+
+              class Field
+                def initialize(field_name, record)
+                  @field_name = field_name
+                  @record     = record
+                end
+
+                def write_value(value)
+                  handle = File.open(full_file_path, 'w')
+                  handle.write(value)
+                  handle.close
+                end
+
+                private
+                  def full_file_path
+                    File.join(@record.send(:base_dir), file_with_extension)
+                  end
+
+                  def file_with_extension
+                    if (extension = config_field_extension).present?
+                      "#{@field_name}.#{extension}"
+                    else
+                      @field_name
+                    end
+                  end
+
+                  def config_field_extension
+                    config.field_extension(@record.send(:table_name), @field_name)
+                  end
+
+                  def config
+                    Config.instance
+                  end
+              end
+          end
       end
   end
 end

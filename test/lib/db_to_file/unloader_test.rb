@@ -8,26 +8,40 @@ describe DbToFile::Unloader do
     end
 
     it 'can be found' do
-      @unloader.send(:config_file).must_equal('config/db_to_file.yml')
+      DbToFile::Config.instance.send(:config_file).must_equal('config/db_to_file.yml')
     end
 
     it 'can be parsed' do
-      @unloader.stub(:config_file, 'test/fixtures/config.yml') do
+      DbToFile::Config.instance.stub(:config_file, 'test/fixtures/config.yml') do
         @unloader.send(:tables).must_equal(['users', 'settings'])
       end
     end
 
     it 'can read directory prefix' do
-      @unloader.stub(:config_file, 'test/fixtures/config.yml') do
-        @unloader.send(:config_directory_prefix, 'users').must_equal('name')
-        @unloader.send(:config_directory_prefix, 'settings').must_equal(nil)
+      @table  = DbToFile::Unloader::Table.new('users', @unloader)
+      @record = DbToFile::Unloader::Table::Record.new(User.first, @table)
+
+      DbToFile::Config.instance.stub(:config_file, 'test/fixtures/config.yml') do
+        @record.send(:config_directory_prefix).must_equal('name')
+      end
+
+      @table  = DbToFile::Unloader::Table.new('settings', @unloader)
+      @record = DbToFile::Unloader::Table::Record.new(Setting.first, @table)
+
+      DbToFile::Config.instance.stub(:config_file, 'test/fixtures/config.yml') do
+        @record.send(:config_directory_prefix).must_equal(nil)
       end
     end
 
     it 'can read file-extensions' do
-      @unloader.stub(:config_file, 'test/fixtures/config.yml') do
-        @unloader.send(:config_field_extension, 'users', 'name').must_equal('txt')
-        @unloader.send(:config_field_extension, 'users', 'id').must_equal(nil)
+      @table      = DbToFile::Unloader::Table.new('users', @unloader)
+      @record     = DbToFile::Unloader::Table::Record.new(User.first, @table)
+      @field_name = DbToFile::Unloader::Table::Record::Field.new('name', @record)
+      @field_id   = DbToFile::Unloader::Table::Record::Field.new('id', @record)
+
+      DbToFile::Config.instance.stub(:config_file, 'test/fixtures/config.yml') do
+        @field_name.send(:config_field_extension).must_equal('txt')
+        @field_id.send(:config_field_extension).must_equal(nil)
       end
     end
   end
@@ -48,11 +62,10 @@ describe DbToFile::Unloader do
     before do
       unloader = DbToFile::Unloader.new
       unloader.stubs(:config_directory_prefix).returns('name')
-      unloader.stubs(:config_ignore_columns).returns(nil)
-      unloader.stubs(:config_field_extension).returns(nil)
-      unloader.expects(:config_field_extension).with('users', 'name').returns('txt')
-      unloader.stub(:tables, ['users']) do
-        unloader.send(:unload_tables)
+      DbToFile::Config.instance.stub(:config_file, 'test/fixtures/config.yml') do
+        unloader.stub(:tables, ['users']) do
+          unloader.send(:unload_tables)
+        end
       end
     end
 
@@ -81,11 +94,10 @@ describe DbToFile::Unloader do
   describe 'build directory for users without prefix' do
     before do
       unloader = DbToFile::Unloader.new
-      unloader.stubs(:config_directory_prefix).returns(nil)
-      unloader.stubs(:config_ignore_columns).returns(nil)
-      unloader.stubs(:config_field_extension).returns(nil)
-      unloader.stub(:tables, ['settings']) do
-        unloader.send(:unload_tables)
+      DbToFile::Config.instance.stub(:config_file, 'test/fixtures/config.yml') do
+        unloader.stub(:tables, ['settings']) do
+          unloader.send(:unload_tables)
+        end
       end
     end
 

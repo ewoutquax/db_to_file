@@ -10,7 +10,8 @@ describe DbToFile::VersionController do
       DbToFile::SystemExecuter.expects(:new).with('git pull').returns(executer)
       File::FileUtils.expects(:rm_rf)
 
-      DbToFile::Unloader.new.send(:prepare_code_version)
+      unloader = instantiate_unloader
+      unloader.send(:prepare_code_version)
     end
   end
 
@@ -122,5 +123,10 @@ describe DbToFile::VersionController do
       executer.expect(:execute, @output_without_merge_error)
       controller.merge_conflicts_present?.must_equal(false)
     end
+  end
+
+  def instantiate_unloader
+    DbToFile::Unloader.any_instance.stubs(:config_file).returns('test/fixtures/config.yml')
+    DbToFile::Unloader.new
   end
 end

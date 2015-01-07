@@ -2,39 +2,27 @@ require_relative '../../test_helper'
 require 'fileutils'
 
 describe DbToFile::Unloader do
-  describe 'configuration-file' do
-    before do
-      @unloader = DbToFile::Unloader.new
-    end
+  let(:unloader) { instantiate_unloader }
 
-    it 'can be found' do
-      @unloader.send(:config_file).must_equal('config/db_to_file.yml')
-    end
+  describe 'configuration-file' do
 
     it 'can be parsed' do
-      @unloader.stub(:config_file, 'test/fixtures/config.yml') do
-        @unloader.send(:tables).must_equal(['users', 'settings'])
-      end
+      unloader.send(:tables).must_equal(['users', 'settings'])
     end
 
     it 'can read directory prefix' do
-      @unloader.stub(:config_file, 'test/fixtures/config.yml') do
-        @unloader.send(:config_directory_prefix, 'users').must_equal('name')
-        @unloader.send(:config_directory_prefix, 'settings').must_equal(nil)
-      end
+      unloader.send(:config_directory_prefix, 'users').must_equal('name')
+      unloader.send(:config_directory_prefix, 'settings').must_equal(nil)
     end
 
     it 'can read file-extensions' do
-      @unloader.stub(:config_file, 'test/fixtures/config.yml') do
-        @unloader.send(:config_field_extension, 'users', 'name').must_equal('txt')
-        @unloader.send(:config_field_extension, 'users', 'id').must_equal(nil)
-      end
+      unloader.send(:config_field_extension, 'users', 'name').must_equal('txt')
+      unloader.send(:config_field_extension, 'users', 'id').must_equal(nil)
     end
   end
 
   describe 'unloading' do
     it 'calls the functions' do
-      unloader = DbToFile::Unloader.new
       unloader.expects(:prepare_code_version)
       unloader.expects(:unload_tables)
       unloader.expects(:update_code_version)
@@ -46,7 +34,6 @@ describe DbToFile::Unloader do
 
   describe 'build directory for users with prefix' do
     before do
-      unloader = DbToFile::Unloader.new
       unloader.stubs(:config_directory_prefix).returns('name')
       unloader.stubs(:config_ignore_columns).returns(nil)
       unloader.stubs(:config_field_extension).returns(nil)
@@ -79,8 +66,8 @@ describe DbToFile::Unloader do
   end
 
   describe 'build directory for users without prefix' do
+
     before do
-      unloader = DbToFile::Unloader.new
       unloader.stubs(:config_directory_prefix).returns(nil)
       unloader.stubs(:config_ignore_columns).returns(nil)
       unloader.stubs(:config_field_extension).returns(nil)
@@ -116,7 +103,7 @@ describe DbToFile::Unloader do
       DbToFile::VersionController.expects(:new).returns(controller)
 
       controller.expect(:prepare_code_version, nil)
-      DbToFile::Unloader.new.send(:prepare_code_version)
+      unloader.send(:prepare_code_version)
       controller.verify
     end
   end
@@ -125,12 +112,16 @@ describe DbToFile::Unloader do
     it 'invokes all the functions' do
       controller = Minitest::Mock.new
 
-      unloader = DbToFile::Unloader.new
       unloader.expects(:version_controller).returns(controller)
 
       controller.expect(:update_code_version, nil)
       unloader.send(:update_code_version)
       controller.verify
     end
+  end
+
+  def instantiate_unloader
+    DbToFile::Unloader.any_instance.stubs(:config_file).returns('test/fixtures/config.yml')
+    DbToFile::Unloader.new
   end
 end

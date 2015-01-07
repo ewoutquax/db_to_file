@@ -6,16 +6,16 @@ require 'pry'
 require 'minitest/unit'
 require 'minitest/autorun'
 require "mocha/setup"
-require 'turn'
+# require 'turn'
 require_relative 'lib/user'
 require_relative 'lib/setting'
 require File.expand_path('../../lib/db_to_file.rb', __FILE__)
-require 'minitest/reporters'
-MiniTest::Reporters.use!
-Turn.config do |c|
-  c.format  = :outline
-  c.natural = true
-end
+# require 'minitest/reporters'
+# MiniTest::Reporters.use!
+# Turn.config do |c|
+#   c.format  = :outline
+#   c.natural = true
+# end
 
 drop_users      = 'drop table if exists `users`'
 drop_settings   = 'drop table if exists `settings`'

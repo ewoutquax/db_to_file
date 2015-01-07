@@ -3,7 +3,7 @@ module DbToFile
     def initialize
       # Load config and build database connection, before stashing possible changes
       @config ||= load_config
-      ActiveRecord::Base.connection.select('show tables')
+      ActiveRecord::Base.connection.send(:select, 'show tables')
     end
 
     def unload

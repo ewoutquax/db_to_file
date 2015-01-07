@@ -14,6 +14,7 @@ module DbToFile
   if defined?(Rails)
     require 'db_to_file/railtie'
   else
+    require 'yaml'
     dbconfig = YAML::load(File.open('db/database.yml'))
     ActiveRecord::Base.establish_connection(dbconfig)
   end

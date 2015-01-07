@@ -2,21 +2,15 @@ module DbToFile
   class Unloader
     def initialize
       # Load config and build database connection, before stashing possible changes
-      begin
-        config.data
-      rescue Errno::ENOENT
-      end
-      begin
-        ActiveRecord::Base.connection.select('show tables')
-      rescue NoMethodError
-      end
+      @config ||= config
+      ActiveRecord::Base.connection.tables
     end
 
     def unload
-      # prepare_code_version
+      prepare_code_version
       unload_tables
-      # update_code_version
-      # restore_local_stash
+      update_code_version
+      restore_local_stash
     end
 
     private

@@ -4,6 +4,14 @@ module DbToFile
   class Config
     include Singleton
 
+    def self.instance
+      @@instance ||= new
+    end
+
+    def initialize
+      @data = load_config
+    end
+
     def tables
       data['tables'].keys
     end
@@ -33,7 +41,7 @@ module DbToFile
     end
 
     def data
-      @data ||= load_config
+      @data
     end
 
     private
